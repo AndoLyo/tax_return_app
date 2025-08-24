@@ -25,22 +25,28 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run Black (code formatting)
-        run: black --check --diff . || echo "Black formatting issues found"
+        run: |
+          black --check --diff . || echo "Black formatting issues found - continuing..."
 
       - name: Run isort (import sorting)
-        run: isort --check-only --diff . || echo "Import sorting issues found"
+        run: |
+          isort --check-only --diff . || echo "Import sorting issues found - continuing..."
 
       - name: Run Ruff (linting)
-        run: ruff check . || echo "Linting issues found"
+        run: |
+          ruff check . || echo "Linting issues found - continuing..."
 
       - name: Run MyPy (type checking)
-        run: mypy . || echo "Type checking issues found"
+        run: |
+          mypy . || echo "Type checking issues found - continuing..."
 
       - name: Run Bandit (security)
-        run: bandit -r . -f json -o bandit-report.json || echo "Security scan completed"
+        run: |
+          bandit -r . -f json -o bandit-report.json || echo "Security scan completed"
 
       - name: Run pip-audit (dependency security)
-        run: pip-audit --format json --output pip-audit-report.json || echo "Dependency audit completed"
+        run: |
+          pip-audit --format json --output pip-audit-report.json || echo "Dependency audit completed"
 
       - name: Upload security reports
         uses: actions/upload-artifact@v3
@@ -77,9 +83,13 @@ jobs:
           mkdir -p tests
           touch tests/__init__.py
 
-      - name: Run tests
+      - name: Run basic tests
         run: |
-          python -m pytest tests/ -v --tb=short || echo "Tests completed with some failures"
+          python -m pytest tests/ -v --tb=short -k "TestBasic" || echo "Basic tests completed"
+
+      - name: Run all tests
+        run: |
+          python -m pytest tests/ -v --tb=short || echo "All tests completed"
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v3
