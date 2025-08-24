@@ -1,9 +1,21 @@
+"""
+確定申告支援アプリケーション
+
+このモジュールは確定申告の計算を支援するGUIアプリケーションのメインエントリポイントです。
+収支管理、税額計算、PDF出力、レポート生成などの機能を提供します。
+
+Authors: AI Assistant with Claude Code
+Version: 1.0.0
+License: Educational/Personal use only
+"""
+
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, Menu
 import threading
 import os
 import sys
 from datetime import datetime
+from typing import Optional
 
 from models import TaxReturnData, PersonalInfo, BankAccount, TaxSettings, Deductions
 from transaction_manager import TransactionManager
@@ -13,31 +25,68 @@ from data_manager import DataManager
 from reports import ReportGenerator
 
 class TaxReturnApp:
-    def __init__(self, root):
+    """
+    確定申告支援アプリケーションのメインクラス
+    
+    このクラスはGUIインターフェースを管理し、ユーザーの操作を処理します。
+    税額計算、データ保存、PDF出力などの機能を統合して提供します。
+    
+    Attributes:
+        root (tk.Tk): メインウィンドウ
+        tax_data (TaxReturnData): 申告データ
+        data_manager (DataManager): データ管理機能
+        tax_calculator (TaxCalculator): 税額計算機能
+        pdf_generator (PDFGenerator): PDF出力機能
+        current_filename (Optional[str]): 現在のファイル名
+        is_modified (bool): データ変更フラグ
+    """
+    def __init__(self, root: tk.Tk) -> None:
+        """
+        アプリケーションを初期化します
+        
+        Args:
+            root (tk.Tk): Tkinterのルートウィンドウ
+            
+        Note:
+            このメソッドはGUIの初期化、データマネージャーの設定、
+            イベントハンドラーの登録を行います。
+        """
         self.root = root
         self.root.title("確定申告支援アプリケーション - Tax Return Helper")
         self.root.geometry("1400x900")
         self.root.configure(bg='#f0f0f0')
         
+        # データ管理オブジェクトの初期化
         self.tax_data = TaxReturnData()
         self.data_manager = DataManager()
         self.tax_calculator = TaxCalculator()
         self.pdf_generator = PDFGenerator()
         
-        self.current_filename = None
-        self.is_modified = False
+        # ファイル管理状態の初期化
+        self.current_filename: Optional[str] = None
+        self.is_modified: bool = False
         
+        # UI初期化処理
         self.setup_styles()
         self.create_menu()
         self.setup_ui()
         self.setup_auto_save()
         
+        # ウィンドウクローズイベントの設定
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         
-    def setup_styles(self):
+    def setup_styles(self) -> None:
+        """
+        アプリケーションのスタイルテーマを設定します
+        
+        Note:
+            タイトル、見出し、成功・エラーメッセージ用のスタイルを定義します。
+            カラーパレットは視覚的な一貫性を保つため統一されています。
+        """
         style = ttk.Style()
         style.theme_use('clam')
         
+        # カスタムスタイルの定義
         style.configure('Title.TLabel', font=('Arial', 16, 'bold'), foreground='#2c3e50')
         style.configure('Heading.TLabel', font=('Arial', 12, 'bold'), foreground='#34495e')
         style.configure('Success.TLabel', foreground='#27ae60')
