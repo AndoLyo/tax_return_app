@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import messagebox, filedialog
+import customtkinter as ctk
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -18,20 +19,21 @@ class ReportGenerator:
         self.setup_ui()
         
     def setup_ui(self):
-        self.main_frame = ttk.Frame(self.parent_frame)
-        self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.main_frame = ctk.CTkFrame(self.parent_frame)
+        self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
-        self.parent_frame.columnconfigure(0, weight=1)
-        self.parent_frame.rowconfigure(0, weight=1)
-        self.main_frame.columnconfigure(1, weight=1)
-        self.main_frame.rowconfigure(2, weight=1)
+        # レポート設定
+        control_title = ctk.CTkLabel(self.main_frame, text="レポート設定", font=ctk.CTkFont(size=16, weight="bold"))
+        control_title.pack(pady=(10, 5))
+        control_frame = ctk.CTkFrame(self.main_frame, corner_radius=10)
+        control_frame.pack(fill="x", pady=(0, 20))
         
-        control_frame = ttk.LabelFrame(self.main_frame, text="レポート設定", padding="10")
-        control_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
-        
-        ttk.Label(control_frame, text="レポート種類:").grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
+        # レポート種類
+        report_type_frame = ctk.CTkFrame(control_frame)
+        report_type_frame.pack(fill="x", pady=10, padx=20)
+        ctk.CTkLabel(report_type_frame, text="レポート種類:", width=100).pack(side="left", padx=10)
         self.report_type_var = tk.StringVar()
-        report_combo = ttk.Combobox(control_frame, textvariable=self.report_type_var, width=20)
+        report_combo = ctk.CTkComboBox(report_type_frame, textvariable=self.report_type_var, width=200)
         report_combo['values'] = [
             "月別収支推移",
             "カテゴリ別収入",
@@ -41,61 +43,67 @@ class ReportGenerator:
             "税額シミュレーション"
         ]
         report_combo.set("月別収支推移")
-        report_combo.grid(row=0, column=1, padx=5)
+        report_combo.pack(side="left", padx=10)
         
-        ttk.Label(control_frame, text="期間:").grid(row=0, column=2, sticky=tk.W, padx=(20, 5))
+        # 期間設定
+        period_frame = ctk.CTkFrame(control_frame)
+        period_frame.pack(fill="x", pady=10, padx=20)
+        ctk.CTkLabel(period_frame, text="期間:", width=100).pack(side="left", padx=10)
         self.start_date_var = tk.StringVar(value=f"{datetime.now().year}-01-01")
-        ttk.Entry(control_frame, textvariable=self.start_date_var, width=12).grid(row=0, column=3, padx=5)
-        ttk.Label(control_frame, text="〜").grid(row=0, column=4, padx=5)
+        ctk.CTkEntry(period_frame, textvariable=self.start_date_var, width=120).pack(side="left", padx=5)
+        ctk.CTkLabel(period_frame, text="〜").pack(side="left", padx=5)
         self.end_date_var = tk.StringVar(value=f"{datetime.now().year}-12-31")
-        ttk.Entry(control_frame, textvariable=self.end_date_var, width=12).grid(row=0, column=5, padx=5)
+        ctk.CTkEntry(period_frame, textvariable=self.end_date_var, width=120).pack(side="left", padx=5)
         
-        button_frame = ttk.Frame(control_frame)
-        button_frame.grid(row=0, column=6, padx=(20, 0))
+        # ボタン
+        button_frame = ctk.CTkFrame(control_frame)
+        button_frame.pack(pady=20, padx=20)
         
-        ttk.Button(button_frame, text="レポート生成", command=self.generate_report).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Excel出力", command=self.export_excel).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="PDF出力", command=self.export_pdf).pack(side=tk.LEFT, padx=5)
+        ctk.CTkButton(button_frame, text="レポート生成", command=self.generate_report, fg_color="#2196F3").pack(side="left", padx=5)
+        ctk.CTkButton(button_frame, text="Excel出力", command=self.export_excel, fg_color="#4CAF50").pack(side="left", padx=5)
+        ctk.CTkButton(button_frame, text="PDF出力", command=self.export_pdf, fg_color="#FF9800").pack(side="left", padx=5)
         
-        summary_frame = ttk.LabelFrame(self.main_frame, text="集計情報", padding="10")
-        summary_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        # メインコンテンツエリア
+        content_frame = ctk.CTkFrame(self.main_frame)
+        content_frame.pack(fill="both", expand=True, pady=10)
         
-        self.summary_text = tk.Text(summary_frame, width=40, height=20, wrap=tk.WORD)
-        summary_scrollbar = ttk.Scrollbar(summary_frame, orient=tk.VERTICAL, command=self.summary_text.yview)
-        self.summary_text.configure(yscrollcommand=summary_scrollbar.set)
+        # 左側：集計情報と詳細データ
+        left_frame = ctk.CTkFrame(content_frame)
+        left_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
         
-        self.summary_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        summary_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        # 集計情報
+        summary_title = ctk.CTkLabel(left_frame, text="集計情報", font=ctk.CTkFont(size=14, weight="bold"))
+        summary_title.pack(pady=(10, 5))
+        summary_frame = ctk.CTkFrame(left_frame, corner_radius=10)
+        summary_frame.pack(fill="both", expand=True, pady=(0, 10))
         
-        summary_frame.columnconfigure(0, weight=1)
-        summary_frame.rowconfigure(0, weight=1)
+        self.summary_text = ctk.CTkTextbox(summary_frame, height=200)
+        self.summary_text.pack(fill="both", expand=True, padx=10, pady=10)
         
-        chart_frame = ttk.LabelFrame(self.main_frame, text="グラフ", padding="10")
-        chart_frame.grid(row=1, column=1, rowspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
-        chart_frame.columnconfigure(0, weight=1)
-        chart_frame.rowconfigure(0, weight=1)
-        
-        self.chart_canvas = None
-        self.chart_frame = chart_frame
-        
-        detail_frame = ttk.LabelFrame(self.main_frame, text="詳細データ", padding="10")
-        detail_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
-        detail_frame.columnconfigure(0, weight=1)
-        detail_frame.rowconfigure(0, weight=1)
+        # 詳細データ
+        detail_title = ctk.CTkLabel(left_frame, text="詳細データ", font=ctk.CTkFont(size=14, weight="bold"))
+        detail_title.pack(pady=(10, 5))
+        detail_frame = ctk.CTkFrame(left_frame, corner_radius=10)
+        detail_frame.pack(fill="both", expand=True)
         
         columns = ("項目", "値")
-        self.detail_tree = ttk.Treeview(detail_frame, columns=columns, show="headings", height=10)
+        self.detail_tree = ctk.CTkTreeview(detail_frame, columns=columns, show="headings", height=200)
         
         self.detail_tree.heading("項目", text="項目")
         self.detail_tree.heading("値", text="値")
         self.detail_tree.column("項目", width=200)
         self.detail_tree.column("値", width=150)
         
-        detail_scrollbar = ttk.Scrollbar(detail_frame, orient=tk.VERTICAL, command=self.detail_tree.yview)
-        self.detail_tree.configure(yscrollcommand=detail_scrollbar.set)
+        self.detail_tree.pack(fill="both", expand=True, padx=10, pady=10)
         
-        self.detail_tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        detail_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        # 右側：グラフ
+        chart_title = ctk.CTkLabel(content_frame, text="グラフ", font=ctk.CTkFont(size=14, weight="bold"))
+        chart_title.pack(pady=(10, 5))
+        chart_frame = ctk.CTkFrame(content_frame, corner_radius=10)
+        chart_frame.pack(side="right", fill="both", expand=True)
+        
+        self.chart_canvas = None
+        self.chart_frame = chart_frame
         
     def generate_report(self):
         try:

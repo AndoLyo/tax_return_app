@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import messagebox, filedialog
+import customtkinter as ctk
 from datetime import datetime, date
 import uuid
 from typing import List, Optional
@@ -12,7 +13,7 @@ class TransactionInputDialog:
         self.transaction = transaction
         self.result = None
         
-        self.dialog = tk.Toplevel(parent)
+        self.dialog = ctk.CTkToplevel(parent)
         self.dialog.title("取引入力" if transaction is None else "取引編集")
         self.dialog.geometry("600x700")
         self.dialog.resizable(False, False)
@@ -26,82 +27,113 @@ class TransactionInputDialog:
         self.dialog.protocol("WM_DELETE_WINDOW", self.on_cancel)
         
     def setup_ui(self):
-        main_frame = ttk.Frame(self.dialog, padding="20")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        main_frame = ctk.CTkFrame(self.dialog)
+        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
-        row = 0
+        # タイトル
+        title = ctk.CTkLabel(
+            main_frame, 
+            text="✏️ 取引入力" if self.transaction is None else "✏️ 取引編集",
+            font=ctk.CTkFont(size=20, weight="bold")
+        )
+        title.pack(pady=(0, 20))
         
-        ttk.Label(main_frame, text="日付*:").grid(row=row, column=0, sticky=tk.W, pady=5)
+        # 日付
+        date_frame = ctk.CTkFrame(main_frame)
+        date_frame.pack(fill="x", pady=5)
+        ctk.CTkLabel(date_frame, text="日付*:", width=100).pack(side="left", padx=10)
         self.date_var = tk.StringVar(value=datetime.now().strftime("%Y-%m-%d"))
-        ttk.Entry(main_frame, textvariable=self.date_var, width=15).grid(row=row, column=1, sticky=tk.W, pady=5)
-        ttk.Label(main_frame, text="(YYYY-MM-DD)").grid(row=row, column=2, sticky=tk.W, pady=5)
-        row += 1
+        self.date_entry = ctk.CTkEntry(date_frame, textvariable=self.date_var, width=150)
+        self.date_entry.pack(side="left", padx=10)
+        ctk.CTkLabel(date_frame, text="(YYYY-MM-DD)").pack(side="left", padx=5)
         
-        ttk.Label(main_frame, text="取引種別*:").grid(row=row, column=0, sticky=tk.W, pady=5)
+        # 取引種別
+        type_frame = ctk.CTkFrame(main_frame)
+        type_frame.pack(fill="x", pady=5)
+        ctk.CTkLabel(type_frame, text="取引種別*:", width=100).pack(side="left", padx=10)
         self.type_var = tk.StringVar()
-        type_combo = ttk.Combobox(main_frame, textvariable=self.type_var, width=20)
-        type_combo['values'] = [t.value for t in TransactionType]
-        type_combo.grid(row=row, column=1, sticky=tk.W, pady=5)
+        type_combo = ctk.CTkComboBox(type_frame, values=[t.value for t in TransactionType], variable=self.type_var, width=200)
+        type_combo.pack(side="left", padx=10)
         type_combo.bind('<<ComboboxSelected>>', self.on_type_change)
-        row += 1
         
-        ttk.Label(main_frame, text="カテゴリ*:").grid(row=row, column=0, sticky=tk.W, pady=5)
+        # カテゴリ
+        category_frame = ctk.CTkFrame(main_frame)
+        category_frame.pack(fill="x", pady=5)
+        ctk.CTkLabel(category_frame, text="カテゴリ*:", width=100).pack(side="left", padx=10)
         self.category_var = tk.StringVar()
-        self.category_combo = ttk.Combobox(main_frame, textvariable=self.category_var, width=30)
-        self.category_combo.grid(row=row, column=1, sticky=tk.W, pady=5)
-        row += 1
+        self.category_combo = ctk.CTkComboBox(category_frame, variable=self.category_var, width=250)
+        self.category_combo.pack(side="left", padx=10)
         
-        ttk.Label(main_frame, text="サブカテゴリ:").grid(row=row, column=0, sticky=tk.W, pady=5)
+        # サブカテゴリ
+        subcategory_frame = ctk.CTkFrame(main_frame)
+        subcategory_frame.pack(fill="x", pady=5)
+        ctk.CTkLabel(subcategory_frame, text="サブカテゴリ:", width=100).pack(side="left", padx=10)
         self.subcategory_var = tk.StringVar()
-        ttk.Entry(main_frame, textvariable=self.subcategory_var, width=30).grid(row=row, column=1, sticky=tk.W, pady=5)
-        row += 1
+        ctk.CTkEntry(subcategory_frame, textvariable=self.subcategory_var, width=250).pack(side="left", padx=10)
         
-        ttk.Label(main_frame, text="金額*:").grid(row=row, column=0, sticky=tk.W, pady=5)
-        amount_frame = ttk.Frame(main_frame)
-        amount_frame.grid(row=row, column=1, sticky=tk.W, pady=5)
+        # 金額
+        amount_frame = ctk.CTkFrame(main_frame)
+        amount_frame.pack(fill="x", pady=5)
+        ctk.CTkLabel(amount_frame, text="金額*:", width=100).pack(side="left", padx=10)
         self.amount_var = tk.StringVar()
-        ttk.Entry(amount_frame, textvariable=self.amount_var, width=15).pack(side=tk.LEFT)
-        ttk.Label(amount_frame, text="円").pack(side=tk.LEFT, padx=(5, 0))
-        row += 1
+        ctk.CTkEntry(amount_frame, textvariable=self.amount_var, width=150).pack(side="left", padx=10)
+        ctk.CTkLabel(amount_frame, text="円").pack(side="left", padx=5)
         
-        ttk.Label(main_frame, text="摘要*:").grid(row=row, column=0, sticky=tk.W, pady=5)
+        # 摘要
+        description_frame = ctk.CTkFrame(main_frame)
+        description_frame.pack(fill="x", pady=5)
+        ctk.CTkLabel(description_frame, text="摘要*:", width=100).pack(side="left", padx=10)
         self.description_var = tk.StringVar()
-        ttk.Entry(main_frame, textvariable=self.description_var, width=50).grid(row=row, column=1, columnspan=2, sticky=tk.W, pady=5)
-        row += 1
+        ctk.CTkEntry(description_frame, textvariable=self.description_var, width=350).pack(side="left", padx=10)
+        
+        # チェックボックス
+        checkbox_frame = ctk.CTkFrame(main_frame)
+        checkbox_frame.pack(fill="x", pady=10)
         
         self.tax_related_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(main_frame, text="税務処理対象", 
-                       variable=self.tax_related_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
-        row += 1
+        ctk.CTkCheckbutton(checkbox_frame, text="税務処理対象", variable=self.tax_related_var).pack(side="left", padx=20)
         
         self.receipt_var = tk.BooleanVar()
-        ttk.Checkbutton(main_frame, text="レシート・領収書あり", 
-                       variable=self.receipt_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
-        row += 1
+        ctk.CTkCheckbutton(checkbox_frame, text="レシート・領収書あり", variable=self.receipt_var).pack(side="left", padx=20)
         
-        ttk.Label(main_frame, text="レシートファイル:").grid(row=row, column=0, sticky=tk.W, pady=5)
-        receipt_frame = ttk.Frame(main_frame)
-        receipt_frame.grid(row=row, column=1, columnspan=2, sticky=tk.W, pady=5)
+        # レシートファイル
+        receipt_frame = ctk.CTkFrame(main_frame)
+        receipt_frame.pack(fill="x", pady=5)
+        ctk.CTkLabel(receipt_frame, text="レシートファイル:", width=100).pack(side="left", padx=10)
         self.receipt_path_var = tk.StringVar()
-        ttk.Entry(receipt_frame, textvariable=self.receipt_path_var, width=40).pack(side=tk.LEFT)
-        ttk.Button(receipt_frame, text="参照", command=self.browse_receipt).pack(side=tk.LEFT, padx=(5, 0))
-        row += 1
+        ctk.CTkEntry(receipt_frame, textvariable=self.receipt_path_var, width=300).pack(side="left", padx=10)
+        ctk.CTkButton(receipt_frame, text="参照", command=self.browse_receipt, width=80).pack(side="left", padx=5)
         
-        ttk.Label(main_frame, text="備考:").grid(row=row, column=0, sticky=tk.NW, pady=5)
-        notes_frame = ttk.Frame(main_frame)
-        notes_frame.grid(row=row, column=1, columnspan=2, sticky=(tk.W, tk.E), pady=5)
-        self.notes_text = tk.Text(notes_frame, width=50, height=5)
-        notes_scrollbar = ttk.Scrollbar(notes_frame, orient=tk.VERTICAL, command=self.notes_text.yview)
-        self.notes_text.configure(yscrollcommand=notes_scrollbar.set)
-        self.notes_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        notes_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-        row += 1
+        # 備考
+        notes_frame = ctk.CTkFrame(main_frame)
+        notes_frame.pack(fill="x", pady=10)
+        ctk.CTkLabel(notes_frame, text="備考:", width=100).pack(anchor="nw", padx=10, pady=5)
         
-        button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=row, column=0, columnspan=3, pady=20)
+        notes_container = ctk.CTkFrame(notes_frame)
+        notes_container.pack(fill="x", padx=10, pady=(0, 10))
         
-        ttk.Button(button_frame, text="保存", command=self.on_save).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="キャンセル", command=self.on_cancel).pack(side=tk.LEFT, padx=5)
+        self.notes_text = ctk.CTkTextbox(notes_container, height=100)
+        self.notes_text.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # ボタン
+        button_frame = ctk.CTkFrame(main_frame)
+        button_frame.pack(fill="x", pady=20)
+        
+        ctk.CTkButton(
+            button_frame, 
+            text="保存", 
+            command=self.on_save,
+            fg_color="#4CAF50",
+            width=120
+        ).pack(side="right", padx=10)
+        
+        ctk.CTkButton(
+            button_frame, 
+            text="キャンセル", 
+            command=self.on_cancel,
+            fg_color="#f44336",
+            width=120
+        ).pack(side="right", padx=10)
         
     def on_type_change(self, event=None):
         type_value = self.type_var.get()
@@ -214,50 +246,51 @@ class TransactionManager:
         self.refresh_transaction_list()
         
     def setup_ui(self):
-        self.main_frame = ttk.Frame(self.parent_frame)
-        self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.main_frame = ctk.CTkFrame(self.parent_frame)
+        self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
         self.parent_frame.columnconfigure(0, weight=1)
         self.parent_frame.rowconfigure(0, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
         
-        button_frame = ttk.Frame(self.main_frame)
-        button_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        button_frame = ctk.CTkFrame(self.main_frame)
+        button_frame.pack(fill="x", pady=(0, 10))
         
-        ttk.Button(button_frame, text="新規取引", command=self.add_transaction).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="編集", command=self.edit_transaction).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="削除", command=self.delete_transaction).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="CSV取込", command=self.import_csv).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="CSV出力", command=self.export_csv).pack(side=tk.LEFT, padx=5)
+        ctk.CTkButton(button_frame, text="新規取引", command=self.add_transaction).pack(side="left", padx=(0, 5))
+        ctk.CTkButton(button_frame, text="編集", command=self.edit_transaction).pack(side="left", padx=5)
+        ctk.CTkButton(button_frame, text="削除", command=self.delete_transaction).pack(side="left", padx=5)
+        ctk.CTkButton(button_frame, text="CSV取込", command=self.import_csv).pack(side="left", padx=5)
+        ctk.CTkButton(button_frame, text="CSV出力", command=self.export_csv).pack(side="left", padx=5)
         
-        filter_frame = ttk.LabelFrame(self.main_frame, text="フィルター", padding="10")
-        filter_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        filter_title = ctk.CTkLabel(self.main_frame, text="フィルター", font=ctk.CTkFont(size=14, weight="bold"))
+        filter_title.pack(pady=(10, 5))
+        filter_frame = ctk.CTkFrame(self.main_frame)
+        filter_frame.pack(fill="x", pady=(0, 10))
         
-        ttk.Label(filter_frame, text="期間:").grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
+        ctk.CTkLabel(filter_frame, text="期間:").pack(side="left", padx=(0, 5))
         self.start_date_var = tk.StringVar(value=f"{datetime.now().year}-01-01")
-        ttk.Entry(filter_frame, textvariable=self.start_date_var, width=12).grid(row=0, column=1, padx=5)
-        ttk.Label(filter_frame, text="〜").grid(row=0, column=2, padx=5)
+        ctk.CTkEntry(filter_frame, textvariable=self.start_date_var, width=120).pack(side="left", padx=5)
+        ctk.CTkLabel(filter_frame, text="〜").pack(side="left", padx=5)
         self.end_date_var = tk.StringVar(value=f"{datetime.now().year}-12-31")
-        ttk.Entry(filter_frame, textvariable=self.end_date_var, width=12).grid(row=0, column=3, padx=5)
+        ctk.CTkEntry(filter_frame, textvariable=self.end_date_var, width=120).pack(side="left", padx=5)
         
-        ttk.Label(filter_frame, text="種別:").grid(row=0, column=4, sticky=tk.W, padx=(20, 5))
+        ctk.CTkLabel(filter_frame, text="種別:").pack(side="left", padx=(20, 5))
         self.filter_type_var = tk.StringVar()
-        type_combo = ttk.Combobox(filter_frame, textvariable=self.filter_type_var, width=15)
-        type_combo['values'] = ["すべて"] + [t.value for t in TransactionType]
+        type_combo = ctk.CTkComboBox(filter_frame, values=["すべて"] + [t.value for t in TransactionType], variable=self.filter_type_var, width=150)
         type_combo.set("すべて")
-        type_combo.grid(row=0, column=5, padx=5)
+        type_combo.pack(side="left", padx=5)
         
-        ttk.Button(filter_frame, text="絞込", command=self.apply_filter).grid(row=0, column=6, padx=(20, 0))
-        ttk.Button(filter_frame, text="リセット", command=self.reset_filter).grid(row=0, column=7, padx=5)
+        ctk.CTkButton(filter_frame, text="絞込", command=self.apply_filter).pack(side="left", padx=(20, 0))
+        ctk.CTkButton(filter_frame, text="リセット", command=self.reset_filter).pack(side="left", padx=5)
         
-        tree_frame = ttk.Frame(self.main_frame)
-        tree_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        tree_frame = ctk.CTkFrame(self.main_frame)
+        tree_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
         tree_frame.columnconfigure(0, weight=1)
         tree_frame.rowconfigure(0, weight=1)
         
         columns = ("date", "type", "category", "description", "amount", "tax_related")
-        self.tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15)
+        self.tree = tk.ttk.Treeview(tree_frame, columns=columns, show="headings", height=15)
         
         self.tree.heading("date", text="日付")
         self.tree.heading("type", text="種別")
@@ -270,28 +303,30 @@ class TransactionManager:
         self.tree.column("type", width=80)
         self.tree.column("category", width=120)
         self.tree.column("description", width=300)
-        self.tree.column("amount", width=100, anchor=tk.E)
+        self.tree.column("amount", width=100, anchor="e")
         self.tree.column("tax_related", width=80)
         
-        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        scrollbar = tk.ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
         
-        self.tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
+        scrollbar.pack(fill="y", side="right", padx=5, pady=5)
         
         self.tree.bind("<Double-1>", self.on_double_click)
         
-        summary_frame = ttk.LabelFrame(self.main_frame, text="集計", padding="10")
-        summary_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(10, 0))
+        summary_title = ctk.CTkLabel(self.main_frame, text="集計", font=ctk.CTkFont(size=14, weight="bold"))
+        summary_title.pack(pady=(10, 5))
+        summary_frame = ctk.CTkFrame(self.main_frame)
+        summary_frame.pack(fill="x", pady=(10, 0))
         
-        self.income_sum_label = ttk.Label(summary_frame, text="収入合計: 0円")
-        self.income_sum_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        self.income_sum_label = ctk.CTkLabel(summary_frame, text="収入合計: 0円")
+        self.income_sum_label.pack(side="left", padx=(0, 20))
         
-        self.expense_sum_label = ttk.Label(summary_frame, text="支出合計: 0円")
-        self.expense_sum_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        self.expense_sum_label = ctk.CTkLabel(summary_frame, text="支出合計: 0円")
+        self.expense_sum_label.pack(side="left", padx=(0, 20))
         
-        self.net_sum_label = ttk.Label(summary_frame, text="差引: 0円")
-        self.net_sum_label.grid(row=0, column=2, sticky=tk.W)
+        self.net_sum_label = ctk.CTkLabel(summary_frame, text="差引: 0円")
+        self.net_sum_label.pack(side="left")
         
     def add_transaction(self):
         dialog = TransactionInputDialog(self.main_frame)
@@ -389,9 +424,9 @@ class TransactionManager:
             
         net_sum = income_sum - expense_sum
         
-        self.income_sum_label.config(text=f"収入合計: {income_sum:,.0f}円")
-        self.expense_sum_label.config(text=f"支出合計: {expense_sum:,.0f}円")
-        self.net_sum_label.config(text=f"差引: {net_sum:,.0f}円")
+        self.income_sum_label.configure(text=f"収入合計: {income_sum:,.0f}円")
+        self.expense_sum_label.configure(text=f"支出合計: {expense_sum:,.0f}円")
+        self.net_sum_label.configure(text=f"差引: {net_sum:,.0f}円")
         
     def import_csv(self):
         filename = filedialog.askopenfilename(
