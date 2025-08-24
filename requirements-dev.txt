@@ -17,21 +17,10 @@ pytest-mock>=3.11.1
 # セキュリティツール
 bandit>=1.7.5
 pip-audit>=2.6.0
-safety>=2.3.5
-
-# 型チェック関連
-types-requests>=2.31.0.10
-types-PyYAML>=6.0.12.12
 
 # 開発支援ツール
 pre-commit>=3.4.0
-tox>=4.6.0
 coverage>=7.3.0
-
-# ドキュメント生成
-sphinx>=7.1.0
-sphinx-rtd-theme>=1.3.0
 
 # 依存関係管理
 pip-tools>=7.3.0
-pipdeptree>=2.13.0

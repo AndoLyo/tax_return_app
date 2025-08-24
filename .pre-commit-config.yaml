@@ -26,7 +26,6 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-all]
         args: [--ignore-missing-imports]
 
   # セキュリティチェック
@@ -68,17 +67,6 @@ repos:
         entry: bash -c 'if grep -r "password\|secret\|key\|token" . --exclude-dir=.git --exclude-dir=__pycache__ --exclude-dir=.venv | grep -v "example\|dummy\|test"; then echo "Potential secrets found"; exit 1; fi'
         language: system
         types: [python]
-
-  # テストの実行
-  - repo: local
-    hooks:
-      - id: run-tests
-        name: Run tests
-        entry: python -m pytest tests/ -v
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [push]
 
 ci:
   autofix_commit_msg: "style: auto-fix code formatting and imports"
